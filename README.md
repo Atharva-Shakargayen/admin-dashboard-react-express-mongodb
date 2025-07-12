@@ -9,49 +9,6 @@ A full-stack **Admin Dashboard** application built using:
 
 ---
 
-## 📁 Project Structure
-
-.
-├── backend/
-│ ├── databse.js # MongoDB connection
-│ ├── index.js # Entry point for backend server
-│ ├── operations.js # Business logic
-│ ├── usermodel.js # Mongoose schema for users
-│ ├── package.json
-│ └── package-lock.json
-│
-├── frontend/
-│ ├── node_modules/
-│ ├── public/
-│ ├── src/
-│ │ ├── assets/
-│ │ ├── components/
-│ │ │ ├── Sidebar.jsx
-│ │ │ ├── UserFormModal.jsx
-│ │ │ └── UserTable.jsx
-│ │ ├── pages/
-│ │ │ ├── Dashboard.jsx
-│ │ │ ├── Layout.jsx
-│ │ │ ├── Users.jsx
-│ │ │ └── layout.css
-│ │ ├── api.js # API integration with backend
-│ │ ├── App.jsx # Main React app
-│ │ ├── App.css
-│ │ ├── main.jsx # React root render
-│ │ └── index.css
-│ ├── index.html
-│ ├── vite.config.js
-│ ├── package.json
-│ └── package-lock.json
-│
-├── .gitignore
-├── eslint.config.js
-├── README.md
-
-
-
----
-
 ## ⚙️ Features
 
 - 🌐 Modern React (JSX + Hooks)
