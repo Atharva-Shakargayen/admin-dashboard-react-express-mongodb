@@ -32,7 +32,7 @@ A full-stack **Admin Dashboard** application built using:
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/admin-dashboard-react-express-mongodb.git
+git clone https://github.com/Atharva-Shakargayen/admin-dashboard-react-express-mongodb.git
 cd admin-dashboard-react-express-mongodb
 2️⃣ Backend Setup
 bash
