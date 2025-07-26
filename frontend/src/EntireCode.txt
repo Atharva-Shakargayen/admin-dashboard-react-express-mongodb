@@ -1,0 +1,292 @@
+//     /components/Sidebar.jsx:
+
+// src/components/Sidebar.jsx
+import React from 'react'
+import { Link } from 'react-router-dom'
+
+const Sidebar = () => {
+  return (
+    <div className="bg-light border p-3" style={{ width: '220px', minHeight: '100vh' }}>
+      <h5>Admin Panel</h5>
+      <ul className="nav flex-column">
+        <li className="nav-item"><Link className="nav-link" to="/">Dashboard</Link></li>
+        <li className="nav-item"><Link className="nav-link" to="/users">Users</Link></li>
+        <li className="nav-item"><Link className="nav-link" to="/layout">Layout</Link></li>
+      </ul>
+    </div>
+  )
+}
+
+export default Sidebar
+
+
+
+
+
+
+//    /components/UserFormModal.jsx:
+
+import React, { useEffect, useState } from 'react';
+import { Modal, Button, Form } from 'react-bootstrap';
+import axios from 'axios';
+
+const UserFormModal = ({ show, handleClose, handleSubmit, user }) => {
+  const [formData, setFormData] = useState({ name: '', email: '', username: '' });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    } else {
+      setFormData({ name: '', email: '', username: '' });
+    }
+  }, [user]);
+
+  const onChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const onFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/newUser",
+        formData
+      );
+      console.log('User created:', response.data);
+      handleClose();
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
+  };
+
+  return (
+    <Modal show={show} onHide={handleClose} backdrop="static" centered>
+      <Form onSubmit={onFormSubmit}>
+        <Modal.Header closeButton>
+          <Modal.Title>{user ? 'Edit User' : 'Add User'}</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Full Name</Form.Label>
+            <Form.Control
+              name="name"
+              value={formData.name}
+              onChange={onChange}
+              placeholder="Enter full name"
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={onChange}
+              placeholder="Enter email"
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Username</Form.Label>
+            <Form.Control
+              name="username"
+              value={formData.username}
+              onChange={onChange}
+              placeholder="Enter username"
+              required
+            />
+          </Form.Group>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit">
+            {user ? 'Update' : 'Create'}
+          </Button>
+        </Modal.Footer>
+      </Form>
+    </Modal>
+  );
+};
+
+export default UserFormModal;
+
+
+
+
+
+
+
+
+
+
+
+
+// /components/UserTable.jsx:
+
+import { Button, Table } from 'react-bootstrap';
+
+export default function UserTable({ users, onEdit, onDelete }) {
+  return (
+    <div className="table-responsive">
+      <Table striped bordered hover className="w-100 align-middle text-nowrap">
+        <thead className="table-dark">
+          <tr>
+            <th>name</th>
+            <th>username</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="text-center">No users found.</td>
+            </tr>
+          ) : (
+            users.map((u) => (
+              <tr key={u.id}>
+                {/* <td>{u.name}</td> */}
+                <td style={{ wordBreak: 'break-word' }}>{u.name}</td>
+                <td style={{ wordBreak: 'break-word' }}>{u.username}</td>
+                <td style={{ wordBreak: 'break-word' }}>{u.email}</td>
+                <td>
+                  <Button
+                    size="sm"
+                    variant="warning"
+                    className="me-2"
+                    onClick={() => onEdit(u)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => onDelete(u.id)}
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </Table>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//   /pages/Users.jsx:
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import UserTable from '../components/UserTable';
+import UserFormModal from '../components/UserFormModal';
+
+const Users = () => {
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const usersPerPage = 5;
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/getAllUsers')
+      .then(res => {setUsers(res.data);
+        console.log(users)
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  const handleDelete = (id) => {
+    setUsers(users.filter(user => user.id !== id));
+  };
+
+  const handleEdit = (user) => {
+    setCurrentUser(user);
+    setShowModal(true);
+  };
+
+  const handleSave = (newUser) => {
+    if (newUser.id) {
+      setUsers(users.map(user => user.id === newUser.id ? newUser : user));
+    } else {
+      const newId = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
+      setUsers([...users, { ...newUser, id: newId }]);
+    }
+    setShowModal(false); // ✅ Close modal
+  };
+
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(search.toLowerCase()) ||
+    u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const indexOfLast = currentPage * usersPerPage;
+  const indexOfFirst = indexOfLast - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirst, indexOfLast);
+
+  return (
+    <div>
+      <h2>Users</h2>
+      <div className="d-flex justify-content-between mb-2">
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          className="form-control w-50"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <button className="btn btn-primary" onClick={() => {
+          setCurrentUser(null);
+          setShowModal(true);
+        }}>Add User</button>
+      </div>
+
+      <UserTable users={users} onEdit={handleEdit} onDelete={handleDelete} />
+
+      <div className="d-flex justify-content-between mt-3">
+        <button
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(prev => prev - 1)}
+        >Previous</button>
+
+        <span>Page {currentPage}</span>
+
+        <button
+          className="btn btn-secondary"
+          disabled={indexOfLast >= filteredUsers.length}
+          onClick={() => setCurrentPage(prev => prev + 1)}
+        >Next</button>
+      </div>
+
+      <UserFormModal
+        show={showModal}
+        handleClose={() => setShowModal(false)}    // ✅ working close
+        handleSubmit={handleSave}                 // ✅ working save
+        user={currentUser}                        // ✅ passed user
+      />
+    </div>
+  );
+};
+
+export default Users;
